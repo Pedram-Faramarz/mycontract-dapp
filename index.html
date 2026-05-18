@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MyContract DApp</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.15.0/ethers.umd.min.js" type="application/javascript"></script>
+    <script src="app.js" type="application/javascript"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+        }
+
+        h2 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .connect-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 8px;
+            font-size: 16px;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+            font-weight: 600;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        hr {
+            border: none;
+            border-top: 2px solid #e0e0e0;
+            margin: 30px 0;
+        }
+
+        .data-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 30px;
+        }
+
+        .data-section p {
+            margin: 15px 0;
+            font-size: 18px;
+            color: #555;
+        }
+
+        .data-section strong {
+            color: #333;
+            min-width: 100px;
+            display: inline-block;
+        }
+
+        .data-section span {
+            color: #667eea;
+            font-weight: 600;
+        }
+
+        .update-section {
+            margin-bottom: 25px;
+        }
+
+        .update-section h3 {
+            color: #333;
+            margin-bottom: 15px;
+            font-size: 1.2em;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select {
+            width: calc(100% - 120px);
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 16px;
+            margin-right: 10px;
+            transition: border-color 0.3s;
+        }
+
+        input:focus,
+        select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .update-section button {
+            width: 100px;
+        }
+
+        /* Modal Overlay */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            max-width: 500px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateY(-50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .modal-content h3 {
+            color: #28a745;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .modal-content .success-icon {
+            font-size: 4em;
+            margin-bottom: 20px;
+        }
+
+        .connection-info {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .connection-info p {
+            margin: 10px 0;
+            color: #555;
+            font-size: 14px;
+            word-wrap: break-word;
+        }
+
+        .connection-info strong {
+            color: #333;
+            display: inline-block;
+            min-width: 140px;
+        }
+
+        .close-modal-btn {
+            margin-top: 20px;
+            background: #28a745;
+        }
+
+        .loading {
+            color: #999;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>MyContract DApp</h2>
+
+        <div class="connect-section">
+            <button onclick="connectWallet()">Connect MetaMask</button>
+        </div>
+
+        <hr>
+
+        <div class="data-section">
+            <h3>On-Chain Data</h3>
+            <p><strong>Owerner Name</strong> <span id="nameOfOwner">-</span></p>
+            <p><strong>Message:</strong> <span id="message" class="loading">Not connected</span></p>
+            <p><strong>Number:</strong> <span id="number" class="loading">Not connected</span></p>
+            <p><strong>Status:</strong> <span id="status" class="loading">Not connected</span></p>
+        </div>
+
+        <hr>
+
+        <div class="update-section">
+            <h3>Update Message</h3>
+            <input type="text" id="newMessage" placeholder="Enter new message">
+            <button onclick="setMessage()">Update</button>
+        </div>
+
+        <div class="update-section">
+            <h3>Update Number</h3>
+            <input type="number" id="newNumber" placeholder="Enter new number">
+            <button onclick="setNumber()">Update</button>
+        </div>
+
+        <div class="update-section">
+            <h3>Update Status</h3>
+            <select id="newStatus">
+                <option value="true">True</option>
+                <option value="false">False</option>
+            </select>
+            <button onclick="setStatus()">Update</button>
+        </div>
+    </div>
+
+    <!-- Connection Success Modal -->
+    <div class="modal-overlay" id="connectionModal">
+        <div class="modal-content">
+            <div class="success-icon">✅</div>
+            <h3>Successfully Connected!</h3>
+            <div class="connection-info">
+                <p><strong>Contract Name:</strong> <span id="modalContractName">MyContract</span></p>
+                <p><strong>Contract Address:</strong> <span id="modalContractAddress">-</span></p>
+                <p><strong>Network:</strong> <span id="modalNetwork">-</span></p>
+            <p><strong>Your Account:</strong> <span id="modalAccount">-</span></p>
+            </div>
+            <button class="close-modal-btn" onclick="closeModal()">Start Using DApp</button>
+        </div>
+    </div>
